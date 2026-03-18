@@ -97,3 +97,29 @@ class RestockAPIView(generics.GenericAPIView):
 
         inventory = Inventory.objects.get(product=product)
         return Response(InventorySerializer(inventory).data, status=status.HTTP_200_OK)
+
+
+class PurchaseAPIView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, product_id):
+        product = generics.get_object_or_404(Product, pk=product_id)
+        quantity = int(request.data.get("quantity", 1))
+
+        inventory = Inventory.objects.get(product=product)
+        if inventory.quantity < quantity:
+            return Response(
+                {"error": "Insufficient stock"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        inventory.quantity -= quantity
+        inventory.save()
+
+        total_price = product.price * quantity
+        return Response({
+            "product": product.name,
+            "quantity": quantity,
+            "total_price": str(total_price),
+            "remaining_stock": inventory.quantity,
+        })
