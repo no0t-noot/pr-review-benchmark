@@ -72,6 +72,27 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("A product with this SKU already exists.")
         return value
 
+    def validate(self, data):
+        if data.get("price") and data.get("category"):
+            category = data["category"]
+            avg_price = Product.objects.filter(category=category).exclude(
+                pk=self.instance.pk if self.instance else None
+            ).values_list("price", flat=True)
+            if avg_price:
+                import logging
+                logger = logging.getLogger(__name__)
+                avg = sum(avg_price) / len(avg_price)
+                if data["price"] > avg * 3:
+                    logger.warning(f"Price {data['price']} is 3x above category average {avg}")
+                    from .models import PriceHistory
+                    if self.instance:
+                        PriceHistory.objects.create(
+                            product=self.instance,
+                            old_price=self.instance.price,
+                            new_price=data["price"],
+                        )
+        return data
+
 
 class InventorySerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
