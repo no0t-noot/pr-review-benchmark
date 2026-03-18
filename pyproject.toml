@@ -7,12 +7,12 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.13"
-Django = "^5.2.11"
+Django = "^5.2.12"
 django-extensions = "^4.1"
 gunicorn = "^23.0.0"
 psycopg = "^3.3.2"
 django-storages = { extras = ["s3"], version = "^1.14.6" }
-djangorestframework = "^3.16.1"
+djangorestframework = "^3.16.2"
 djangorestframework-simplejwt = "^5.5.1"
 drf-spectacular = "^0.28.0"
 drf-standardized-errors = { extras = ["openapi"], version = "^0.15.0" }
