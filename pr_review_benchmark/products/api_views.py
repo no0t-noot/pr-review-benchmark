@@ -5,9 +5,10 @@ from rest_framework import generics, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Category, Inventory, PriceHistory, Product
+from .models import Category, Discount, Inventory, PriceHistory, Product
 from .serializers import (
     CategorySerializer,
+    DiscountSerializer,
     InventorySerializer,
     PriceUpdateSerializer,
     ProductCreateUpdateSerializer,
@@ -97,3 +98,9 @@ class RestockAPIView(generics.GenericAPIView):
 
         inventory = Inventory.objects.get(product=product)
         return Response(InventorySerializer(inventory).data, status=status.HTTP_200_OK)
+
+
+class DiscountViewSet(viewsets.ModelViewSet):
+    queryset = Discount.objects.select_related("product").all()
+    serializer_class = DiscountSerializer
+    permission_classes = [IsAuthenticated]

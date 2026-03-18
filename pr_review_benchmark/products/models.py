@@ -65,6 +65,19 @@ class Product(TimestampedModel):
     def current_price(self):
         return self.price
 
+    def get_discounted_price(self):
+        from django.utils import timezone
+
+        now = timezone.now()
+        active_discount = self.discounts.filter(
+            is_active=True,
+            start_date__lte=now,
+            end_date__gte=now,
+        ).order_by("-discount_percent").first()
+        if active_discount:
+            return self.price * (1 - active_discount.discount_percent / 100)
+        return self.price
+
 
 class Inventory(models.Model):
     product = models.OneToOneField(Product, on_delete=models.CASCADE, related_name="inventory")
@@ -82,6 +95,21 @@ class Inventory(models.Model):
     @property
     def is_low_stock(self):
         return self.quantity <= self.low_stock_threshold
+
+
+class Discount(TimestampedModel):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="discounts")
+    name = models.CharField(max_length=100)
+    discount_percent = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0)])
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name} - {self.discount_percent}% off {self.product.name}"
 
 
 class PriceHistory(models.Model):
