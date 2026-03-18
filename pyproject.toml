@@ -20,7 +20,7 @@ celery = { extras = ["redis"], version = "^5.6.2" }
 dj-database-url = "^3.1.0"
 whitenoise = "^6.11.0"
 ipython = "^9.10.0"
-django-silk = "^5.4.3"
+django-silk = "^5.5.0"
 sentry-sdk = "^2.52.0"
 django-hijack = "^3.7.6"
 factory-boy = "^3.3.3"
