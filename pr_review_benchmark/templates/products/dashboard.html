@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Product Dashboard</h1>
+
+<div class="stats-overview">
+    <div class="stat-card">
+        <h3>Total Products</h3>
+        <p>{{ total_products }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Categories</h3>
+        <p>{{ total_categories }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Average Price</h3>
+        <p>${{ avg_price|floatformat:2 }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Low Stock Items</h3>
+        <p>{{ low_stock_count }}</p>
+    </div>
+</div>
+
+<div class="category-breakdown">
+    <h2>Category Breakdown</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Products</th>
+                <th>Total Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cat in category_stats %}
+            <tr>
+                <td>{{ cat.name }}</td>
+                <td>{{ cat.product_count }}</td>
+                <td>${{ cat.total_value|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

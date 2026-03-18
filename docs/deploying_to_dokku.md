@@ -15,8 +15,8 @@ sudo dokku plugin:install https://github.com/dokku/dokku-redis.git redis
 ```bash
 # On your Dokku host:
 
-# Create a new app with the name django-template
-dokku apps:create django-template
+# Create a new app with the name pr-review-benchmark
+dokku apps:create pr-review-benchmark
 ```
 
 ## Configure Postgres service
@@ -25,10 +25,10 @@ dokku apps:create django-template
 # On your Dokku host:
 
 # Create a new Postgres 17 service
-dokku postgres:create django-template-postgres --image-version 17
+dokku postgres:create pr-review-benchmark-postgres --image-version 17
 
 # Link the Postgres service to your Dokku app
-dokku postgres:link django-template-postgres django-template
+dokku postgres:link pr-review-benchmark-postgres pr-review-benchmark
 ```
 
 ## Configure Redis service
@@ -37,10 +37,10 @@ dokku postgres:link django-template-postgres django-template
 # On your Dokku host:
 
 # Create a new Redis 7.2 service
-dokku redis:create django-template-redis --image-version 7.2
+dokku redis:create pr-review-benchmark-redis --image-version 7.2
 
 # Link the Redis service to your Dokku app
-dokku redis:link django-template-redis django-template
+dokku redis:link pr-review-benchmark-redis pr-review-benchmark
 ```
 
 ## Configure environment variables
@@ -49,19 +49,19 @@ dokku redis:link django-template-redis django-template
 # On your Dokku host:
 
 # Generate and set SECRET_KEY
-dokku config:set django-template SECRET_KEY=$(python3 -c "import secrets; print(''.join(secrets.choice([chr(i) for i in range(0x21, 0x7F)]) for i in range(60)));")
+dokku config:set pr-review-benchmark SECRET_KEY=$(python3 -c "import secrets; print(''.join(secrets.choice([chr(i) for i in range(0x21, 0x7F)]) for i in range(60)));")
 
 # Set DJANGO_SETTINGS_MODULE
-dokku config:set django-template DJANGO_SETTINGS_MODULE=django_template.settings.base
+dokku config:set pr-review-benchmark DJANGO_SETTINGS_MODULE=pr_review_benchmark.settings.base
 
 # Set ALLOWED_HOSTS
-dokku config:set django-template ALLOWED_HOSTS=v-django-template.app.vilantis.ai
+dokku config:set pr-review-benchmark ALLOWED_HOSTS=v-pr-review-benchmark.app.vilantis.ai
 
 # Set CSRF_TRUSTED_ORIGINS
-dokku config:set django-template CSRF_TRUSTED_ORIGINS=https://django-template.app.vilantis.ai
+dokku config:set pr-review-benchmark CSRF_TRUSTED_ORIGINS=https://pr-review-benchmark.app.vilantis.ai
 
 # Set SENTRY_DSN
-dokku config:set django-template SENTRY_DSN=https://sentry-dsn-here.com/
+dokku config:set pr-review-benchmark SENTRY_DSN=https://sentry-dsn-here.com/
 ```
 
 ## Configure Dokku to build and release the `production` Docker image stage
@@ -70,7 +70,7 @@ dokku config:set django-template SENTRY_DSN=https://sentry-dsn-here.com/
 # On your Dokku host:
 
 # Add "--target production" to the build args
-dokku docker-options:add django-template build "--target production"
+dokku docker-options:add pr-review-benchmark build "--target production"
 ```
 
 ## Configure git and push your app
@@ -78,7 +78,7 @@ dokku docker-options:add django-template build "--target production"
 ```bash
 # On your development machine:
 
-git remote add dokku dokku@example.com:django-template
+git remote add dokku dokku@example.com:pr-review-benchmark
 git push dokku main
 ```
 
@@ -88,5 +88,5 @@ git push dokku main
 # On your Dokku host:
 
 # Forward requests from host port 80 container port 8000
-dokku ports:set django-template http:80:8000
+dokku ports:set pr-review-benchmark http:80:8000
 ```

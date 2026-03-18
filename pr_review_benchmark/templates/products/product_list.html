@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Products</h1>
+
+<div class="product-grid">
+    {% for product in products %}
+    <div class="product-card">
+        <h3><a href="{% url 'products:product-detail' product.pk %}">{{ product.name }}</a></h3>
+        <p class="sku">{{ product.sku }}</p>
+        <p class="price">${{ product.price }}</p>
+        <p class="category">{{ product.category }}</p>
+        <p class="supplier">{{ product.supplier }}</p>
+    </div>
+    {% empty %}
+    <p>No products available.</p>
+    {% endfor %}
+</div>
+
+{% if is_paginated %}
+<nav class="pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+    {% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">Next</a>
+    {% endif %}
+</nav>
+{% endif %}
+{% endblock %}

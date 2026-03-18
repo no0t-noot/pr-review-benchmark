@@ -1,4 +1,4 @@
-# django-template
+# pr-review-benchmark
 
 A template project with:
 
@@ -31,7 +31,7 @@ Clone your new repository.
 
 Ensure that you have GNU or BSD Make installed.
 
-Run the `rename` Makefile target to replace all instances of `django_template` and `django-template` with your project's name in snake_case and kebab-case, respectively.
+Run the `rename` Makefile target to replace all instances of `pr_review_benchmark` and `pr-review-benchmark` with your project's name in snake_case and kebab-case, respectively.
 
 ```bash
 make rename PROJECT_NAME=my_project_name_with_underscores

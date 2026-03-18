@@ -2,7 +2,7 @@ __pycache__
 .env
 **.dump
 
-django_template/static_built
+pr_review_benchmark/static_built
 static_collected
 
 node_modules

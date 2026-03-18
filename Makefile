@@ -34,10 +34,10 @@ makemigrations:
 	docker compose run --rm web python3 manage.py makemigrations
 
 test:
-	docker compose run --rm web python3 manage.py test --settings=django_template.settings.test -v=2
+	docker compose run --rm web python3 manage.py test --settings=pr_review_benchmark.settings.test -v=2
 
 test-keepdb:
-	docker compose run --rm web python3 manage.py test --settings=django_template.settings.test -v=2 --keepdb
+	docker compose run --rm web python3 manage.py test --settings=pr_review_benchmark.settings.test -v=2 --keepdb
 
 makemessages:
 	docker compose run --rm web python3 manage.py makemessages -a
@@ -68,22 +68,22 @@ rename:
 	@echo ""
 	@echo "This Makefile target will:"
 	@echo "1.) Replace all instances of the following in files and folders:"
-	@echo "  - \`django_template\` with \`$(PROJECT_NAME)\`"
-	@echo "  - \`django-template\` with \`$(PROJECT_NAME_KEBAB)\`"
+	@echo "  - \`pr_review_benchmark\` with \`$(PROJECT_NAME)\`"
+	@echo "  - \`pr-review-benchmark\` with \`$(PROJECT_NAME_KEBAB)\`"
 	@echo ""
 	@echo "Proceeding in 10 seconds..."
 	@echo ""
 
 	@sleep 10
 
-	@# Rename the django_template directory
-	mv django_template $(PROJECT_NAME)
+	@# Rename the pr_review_benchmark directory
+	mv pr_review_benchmark $(PROJECT_NAME)
 
-	@# Replace all instances of django_template with PROJECT_NAME
-	grep -rl django_template . | xargs perl -i -pe "s/django_template/$(PROJECT_NAME)/g"
+	@# Replace all instances of pr_review_benchmark with PROJECT_NAME
+	grep -rl pr_review_benchmark . | xargs perl -i -pe "s/pr_review_benchmark/$(PROJECT_NAME)/g"
 
-	@# Replace all instances of django-template with PROJECT_NAME_KEBAB
-	grep -rl django-template . | xargs perl -i -pe "s/django-template/$(PROJECT_NAME_KEBAB)/g"
+	@# Replace all instances of pr-review-benchmark with PROJECT_NAME_KEBAB
+	grep -rl pr-review-benchmark . | xargs perl -i -pe "s/pr-review-benchmark/$(PROJECT_NAME_KEBAB)/g"
 
 	@# Reset git index
 	rm .git/index

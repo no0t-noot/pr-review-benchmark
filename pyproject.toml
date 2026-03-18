@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "django-template"
+name = "pr-review-benchmark"
 version = "0.0.0"
 description = ""
 authors = ["Vilantis <hello@vilantis.ai>"]
@@ -30,6 +30,8 @@ requests = "^2.32.5"
 werkzeug = "^3.1.5"
 watchdog = "^6.0.0"
 django-browser-reload = "^1.21.0"
+pytest = "*"
+pytest-django = "*"
 ruff = "*"
 pre-commit = "^4.5.1"
 bandit = "^1.9.3"
@@ -59,13 +61,19 @@ select = [
 ignore = [
   "SIM108", # don't recommend ternary operator
 ]
-exclude = ["django_template/*/migrations/*.py"]
+exclude = ["pr_review_benchmark/*/migrations/*.py"]
 
 [tool.ruff.format]
-exclude = ["django_template/*/migrations/*.py"]
+exclude = ["pr_review_benchmark/*/migrations/*.py"]
 
 [tool.bandit]
 exclude_dirs = ["tests"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "pr_review_benchmark.settings.test"
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
 
 [tool.djlint]
 # https://www.djlint.com/docs/linter/#rules

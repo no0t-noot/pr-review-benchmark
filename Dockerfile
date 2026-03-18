@@ -26,26 +26,26 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean \
   && echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 # Set up unprivileged user
-RUN useradd --create-home django_template
+RUN useradd --create-home pr_review_benchmark
 
 # Set up project directory
 ENV APP_DIR=/app
 RUN mkdir -p "$APP_DIR" \
-  && chown -R django_template:django_template "$APP_DIR"
+  && chown -R pr_review_benchmark:pr_review_benchmark "$APP_DIR"
 
 # Set up node_modules so it's owned and writable by the unprivileged user
 RUN mkdir -p "$APP_DIR/node_modules" \
-  && chown -R django_template:django_template "$APP_DIR/node_modules"
+  && chown -R pr_review_benchmark:pr_review_benchmark "$APP_DIR/node_modules"
 
 # Set up virtualenv
 ENV VIRTUAL_ENV=/venv
 ENV PATH=/venv/bin:$PATH
 RUN mkdir -p /venv \
   && python3 -m venv /venv \
-  && chown -R django_template:django_template /venv
+  && chown -R pr_review_benchmark:pr_review_benchmark /venv
 
 # Switch to unprivileged user
-USER django_template
+USER pr_review_benchmark
 
 # Switch to project directory
 WORKDIR $APP_DIR
@@ -61,7 +61,7 @@ ENV PORT=8000
 EXPOSE 8000
 
 # Set up entrypoint
-COPY --chown=django_template:django_template entrypoint.sh ./
+COPY --chown=pr_review_benchmark:pr_review_benchmark entrypoint.sh ./
 ENTRYPOINT ["./entrypoint.sh"]
 
 # Serve project with gunicorn
@@ -87,29 +87,29 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
   && apt-get install -y nodejs
 
 # Switch back to unprivileged user
-USER django_template
+USER pr_review_benchmark
 
 # Copy Poetry from poetry-install
 ENV POETRY_HOME=/opt/poetry
 ENV PATH=/opt/poetry/bin:$PATH
-COPY --from=poetry-install --chown=django_template:django_template /opt/poetry /opt/poetry
+COPY --from=poetry-install --chown=pr_review_benchmark:pr_review_benchmark /opt/poetry /opt/poetry
 
 # Install main project dependencies
 RUN --mount=type=bind,source=pyproject.toml,target=/app/pyproject.toml \
   --mount=type=bind,source=poetry.lock,target=/app/poetry.lock \
-  --mount=type=cache,target=/home/django_template/.cache/pypoetry,uid=1000 \
-  --mount=type=cache,target=/home/django_template/.cache/pip,uid=1000 \
+  --mount=type=cache,target=/home/pr_review_benchmark/.cache/pypoetry,uid=1000 \
+  --mount=type=cache,target=/home/pr_review_benchmark/.cache/pip,uid=1000 \
   poetry install --only main
 
 # Install Node dependencies
 RUN --mount=type=bind,source=package.json,target=/app/package.json \
   --mount=type=bind,source=package-lock.json,target=/app/package-lock.json \
-  --mount=type=cache,target=/home/django_template/.npm,uid=1000 \
+  --mount=type=cache,target=/home/pr_review_benchmark/.npm,uid=1000 \
   npm ci
 
 # Copy the project files
 # Ensure that this is one of the last commands for better layer caching
-COPY --chown=django_template:django_template . .
+COPY --chown=pr_review_benchmark:pr_review_benchmark . .
 
 # Build minified Tailwind styles
 RUN npm run tailwind:build
@@ -138,22 +138,22 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
   && apt-get install -y libpq-dev
 
 # Switch back to unprivileged user
-USER django_template
+USER pr_review_benchmark
 
 # Copy Poetry from poetry-install
 ENV POETRY_HOME=/opt/poetry
 ENV PATH=/opt/poetry/bin:$PATH
-COPY --from=poetry-install --chown=django_template:django_template /opt/poetry /opt/poetry
+COPY --from=poetry-install --chown=pr_review_benchmark:pr_review_benchmark /opt/poetry /opt/poetry
 
 # Copy virtualenv from pre-production
-COPY --from=pre-production --chown=django_template:django_template /venv /venv
+COPY --from=pre-production --chown=pr_review_benchmark:pr_review_benchmark /venv /venv
 
 # Copy staticfiles from pre-production
-COPY --from=pre-production --chown=django_template:django_template /app/static_collected /app/static_collected
+COPY --from=pre-production --chown=pr_review_benchmark:pr_review_benchmark /app/static_collected /app/static_collected
 
 # Copy the project files
 # Ensure that this is one of the last commands for better layer caching
-COPY --chown=django_template:django_template . .
+COPY --chown=pr_review_benchmark:pr_review_benchmark . .
 
 ###################
 # Dev build stage #
@@ -186,26 +186,26 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
   && apt-get install -y git nodejs postgresql-client-17 gettext
 
 # Switch back to unprivileged user
-USER django_template
+USER pr_review_benchmark
 
 # Copy Poetry from poetry-install
 ENV POETRY_HOME=/opt/poetry
 ENV PATH=/opt/poetry/bin:$PATH
-COPY --from=poetry-install --chown=django_template:django_template /opt/poetry /opt/poetry
+COPY --from=poetry-install --chown=pr_review_benchmark:pr_review_benchmark /opt/poetry /opt/poetry
 
 # Install Node dependencies
 RUN --mount=type=bind,source=package.json,target=/app/package.json \
   --mount=type=bind,source=package-lock.json,target=/app/package-lock.json \
-  --mount=type=cache,target=/home/django_template/.npm,uid=1000 \
+  --mount=type=cache,target=/home/pr_review_benchmark/.npm,uid=1000 \
   npm ci
 
 # Install all project dependencies
 RUN --mount=type=bind,source=pyproject.toml,target=/app/pyproject.toml \
   --mount=type=bind,source=poetry.lock,target=/app/poetry.lock \
-  --mount=type=cache,target=/home/django_template/.cache/pypoetry,uid=1000 \
-  --mount=type=cache,target=/home/django_template/.cache/pip,uid=1000 \
+  --mount=type=cache,target=/home/pr_review_benchmark/.cache/pypoetry,uid=1000 \
+  --mount=type=cache,target=/home/pr_review_benchmark/.cache/pip,uid=1000 \
   poetry install
 
 # Copy the project files
 # Ensure that this is one of the last commands for better layer caching
-COPY --chown=django_template:django_template . .
+COPY --chown=pr_review_benchmark:pr_review_benchmark . .

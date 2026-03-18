@@ -1,0 +1,22 @@
+{% load i18n static %}
+<header class="flex border-b">
+    <div class="container mx-auto px-8 py-4">
+        <div class="flex justify-between">
+            <div>
+                <a href="{% url "core:index" %}">pr_review_benchmark</a>
+            </div>
+            <div class="flex">
+                {% if request.user.is_authenticated %}
+                    {{ request.user }}
+                    <form method="post" action="{% url "logout" %}">
+                        {% csrf_token %}
+                        <button type="submit" class="ml-4 cursor-pointer">{% translate "Log out" %}</button>
+                    </form>
+                {% else %}
+                    <a href="{% url "login" %}" class="ml-4">{% translate "Log in" %}</a>
+                    <a href="{% url "registration:register" %}" class="ml-4">{% translate "Register" %}</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>

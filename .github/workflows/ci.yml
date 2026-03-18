@@ -81,7 +81,7 @@ jobs:
         run: poetry run python3 manage.py collectstatic --noinput
 
       - name: Run tests
-        run: poetry run python3 manage.py test --settings=django_template.settings.test -v=2
+        run: poetry run python3 manage.py test --settings=pr_review_benchmark.settings.test -v=2
 
   deploy:
     runs-on: ubuntu-latest
@@ -111,7 +111,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Build Docker image
-        run: docker build --target production -t dokku/django-template:${{ github.sha }} --build-arg GIT_REVISION=${{ github.sha }} .
+        run: docker build --target production -t dokku/pr-review-benchmark:${{ github.sha }} --build-arg GIT_REVISION=${{ github.sha }} .
 
       - name: Set up SSH key
         run: |
@@ -140,14 +140,14 @@ jobs:
             -o UserKnownHostsFile=/dev/null \
             -o StrictHostKeyChecking=no \
             ubuntu@${{ secrets.DOKKU_HOST_NAME }} \
-            'sudo docker images dokku/django-template -q | xargs sudo docker image rm --force' \
+            'sudo docker images dokku/pr-review-benchmark -q | xargs sudo docker image rm --force' \
             || true
 
       - name: Deploy to Dokku
         run: |
           docker \
             save \
-            dokku/django-template:${{ github.sha }} \
+            dokku/pr-review-benchmark:${{ github.sha }} \
             | ssh \
               -p ${{ secrets.DOKKU_HOST_PORT }} \
               -i /tmp/dokku-deploy-key \
@@ -155,5 +155,5 @@ jobs:
               -o StrictHostKeyChecking=no \
               dokku@${{ secrets.DOKKU_HOST_NAME }} \
               git:load-image \
-              django-template \
-              dokku/django-template:${{ github.sha }}
+              pr-review-benchmark \
+              dokku/pr-review-benchmark:${{ github.sha }}

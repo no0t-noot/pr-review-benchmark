@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ product.name }}</h1>
+<p class="sku">SKU: {{ product.sku }}</p>
+<p class="price">Price: ${{ product.price }}</p>
+
+<div class="product-info">
+    <h2>Details</h2>
+    <p>{{ product.description }}</p>
+    <p>Category: {{ product.category.name }}</p>
+    <p>Supplier: {{ product.supplier.name }}</p>
+    <p>Status: {% if product.is_active %}Active{% else %}Inactive{% endif %}</p>
+</div>
+
+{% if product.inventory %}
+<div class="inventory-info">
+    <h2>Inventory</h2>
+    <p>Quantity: {{ product.inventory.quantity }}</p>
+    <p>Low Stock Threshold: {{ product.inventory.low_stock_threshold }}</p>
+    {% if product.inventory.is_low_stock %}
+    <p class="warning">Low stock!</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="price-history">
+    <h2>Price History</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Old Price</th>
+                <th>New Price</th>
+                <th>Changed At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in product.price_history.all %}
+            <tr>
+                <td>${{ entry.old_price }}</td>
+                <td>${{ entry.new_price }}</td>
+                <td>{{ entry.changed_at }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No price history available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="{% url 'products:product-list' %}">Back to products</a>
+{% endblock %}

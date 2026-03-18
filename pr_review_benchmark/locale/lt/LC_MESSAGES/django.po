@@ -1,0 +1,78 @@
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-25 07:41+0000\n"
+"Language: lt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? "
+"1 : n % 1 != 0 ? 2: 3);\n"
+
+#: pr_review_benchmark/lib/models.py:8
+msgid "Created at"
+msgstr "Sukurta laikas"
+
+#: pr_review_benchmark/lib/models.py:9
+msgid "Updated at"
+msgstr "Atnaujintas laikas"
+
+#: pr_review_benchmark/registration/views.py:14
+msgid "Your account has been created. You can now log in."
+msgstr "Jūsų paskyra sukurta. Dabar galite prisijungti."
+
+#: pr_review_benchmark/settings/base.py:134
+msgid "English"
+msgstr "Anglų"
+
+#: pr_review_benchmark/settings/base.py:135
+msgid "Lithuanian"
+msgstr "lietuvių"
+
+#: pr_review_benchmark/templates/core/index.html:5
+msgid "Welcome to your new site!"
+msgstr "Sveiki atvykę į naują svetainę!"
+
+#: pr_review_benchmark/templates/core/index.html:6
+msgid "You are running:"
+msgstr "Tu paleidi:"
+
+#: pr_review_benchmark/templates/header.html:11
+msgid "Log out"
+msgstr "Atsijungti"
+
+#: pr_review_benchmark/templates/header.html:13
+#: pr_review_benchmark/templates/registration/login.html:5
+msgid "Log in"
+msgstr "Prisijungti"
+
+#: pr_review_benchmark/templates/header.html:14
+#: pr_review_benchmark/templates/users/register.html:5
+msgid "Register"
+msgstr "Registruotis"
+
+#: pr_review_benchmark/templates/registration/login.html:13
+msgid "Forgot password?"
+msgstr "Pamiršote slaptažodį?"
+
+#: pr_review_benchmark/templates/registration/password_reset_complete.html:5
+msgid "Password reset complete"
+msgstr "Slaptažodis atnaujintas"
+
+#: pr_review_benchmark/templates/registration/password_reset_confirm.html:5
+#: pr_review_benchmark/templates/registration/password_reset_form.html:5
+msgid "Reset password"
+msgstr "Atkurti slaptažodį"
+
+#: pr_review_benchmark/templates/registration/password_reset_done.html:5
+msgid "Password reset sent"
+msgstr "Slaptažodžio nustatymas iš naujo išsiųstas"
+
+#: pr_review_benchmark/users/admin.py:16
+msgid "Personal info"
+msgstr "Asmeninė informacija"
+
+#: pr_review_benchmark/users/models.py:39
+msgid "email address"
+msgstr "el. pašto adresą"

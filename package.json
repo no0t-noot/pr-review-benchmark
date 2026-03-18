@@ -1,9 +1,9 @@
 {
-  "name": "django-template",
+  "name": "pr-review-benchmark",
   "version": "0.0.0",
   "scripts": {
-    "tailwind:build": "npx @tailwindcss/cli -i django_template/static_src/tailwind/styles.css -o django_template/static_built/tailwind/styles.css --minify",
-    "tailwind:watch": "npx @tailwindcss/cli -i django_template/static_src/tailwind/styles.css -o django_template/static_built/tailwind/styles.css --watch"
+    "tailwind:build": "npx @tailwindcss/cli -i pr_review_benchmark/static_src/tailwind/styles.css -o pr_review_benchmark/static_built/tailwind/styles.css --minify",
+    "tailwind:watch": "npx @tailwindcss/cli -i pr_review_benchmark/static_src/tailwind/styles.css -o pr_review_benchmark/static_built/tailwind/styles.css --watch"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.18",
