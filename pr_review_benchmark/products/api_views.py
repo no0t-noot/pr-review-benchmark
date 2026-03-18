@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Category, Inventory, PriceHistory, Product
+from .utils import format_price
 from .serializers import (
     CategorySerializer,
     InventorySerializer,
@@ -73,7 +74,7 @@ class UpdatePriceAPIView(generics.GenericAPIView):
         product.save(update_fields=["price", "updated_at"])
 
         return Response(
-            {"old_price": str(old_price), "new_price": str(new_price)},
+            {"old_price": format_price(old_price), "new_price": format_price(new_price)},
             status=status.HTTP_200_OK,
         )
 
