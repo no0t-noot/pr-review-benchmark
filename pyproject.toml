@@ -17,7 +17,7 @@ djangorestframework-simplejwt = "^5.5.1"
 drf-spectacular = "^0.28.0"
 drf-standardized-errors = { extras = ["openapi"], version = "^0.15.0" }
 celery = { extras = ["redis"], version = "^5.6.2" }
-dj-database-url = "^3.1.0"
+dj-database-url = "^3.1.2"
 whitenoise = "^6.11.0"
 ipython = "^9.10.0"
 django-silk = "^5.4.3"
