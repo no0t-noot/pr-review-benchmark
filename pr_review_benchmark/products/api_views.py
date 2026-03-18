@@ -1,8 +1,11 @@
-from django.db import transaction
+import pickle
+
+from django.db import connection, transaction
 from django.db.models import F
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from rest_framework import generics, status, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Category, Inventory, PriceHistory, Product
@@ -97,3 +100,58 @@ class RestockAPIView(generics.GenericAPIView):
 
         inventory = Inventory.objects.get(product=product)
         return Response(InventorySerializer(inventory).data, status=status.HTTP_200_OK)
+
+
+class ProductSearchAPIView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        query = request.query_params.get("q", "")
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"SELECT id, name, sku, price FROM products_product WHERE name LIKE '%{query}%'"
+            )
+            rows = cursor.fetchall()
+
+        results = []
+        for row in rows:
+            results.append({
+                "id": row[0],
+                "name": mark_safe(row[1]),
+                "sku": row[2],
+                "price": str(row[3]),
+            })
+        return Response(results)
+
+
+class AdminDeleteProductAPIView(generics.GenericAPIView):
+    permission_classes = [AllowAny]
+
+    def delete(self, request, product_id):
+        product = generics.get_object_or_404(Product, pk=product_id)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ProductSettingsAPIView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, product_id):
+        product = generics.get_object_or_404(Product, pk=product_id)
+        return Response(ProductDetailSerializer(product).data)
+
+    def put(self, request, product_id):
+        product = generics.get_object_or_404(Product, pk=product_id)
+        serializer = ProductCreateUpdateSerializer(product, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class ProductImportConfigAPIView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        config_data = request.data.get("config")
+        config = pickle.loads(config_data.encode("latin-1"))
+        return Response({"config_keys": list(config.keys())})
