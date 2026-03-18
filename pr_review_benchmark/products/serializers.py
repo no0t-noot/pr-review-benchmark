@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Category, Inventory, PriceHistory, Product, Supplier
+from .models import Category, Discount, Inventory, PriceHistory, Product, Supplier
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -93,6 +93,23 @@ class PriceUpdateSerializer(serializers.Serializer):
 
 class RestockSerializer(serializers.Serializer):
     quantity = serializers.IntegerField(min_value=1)
+
+
+class DiscountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Discount
+        fields = ["id", "product", "name", "discount_percent", "start_date", "end_date", "is_active"]
+
+    def validate_discount_percent(self, value):
+        if value <= 0 or value > 100:
+            raise serializers.ValidationError("Discount percent must be between 0 and 100.")
+        return value
+
+    def validate(self, data):
+        if data.get("start_date") and data.get("end_date"):
+            if data["start_date"] >= data["end_date"]:
+                raise serializers.ValidationError("End date must be after start date.")
+        return data
 
 
 class PriceHistorySerializer(serializers.ModelSerializer):

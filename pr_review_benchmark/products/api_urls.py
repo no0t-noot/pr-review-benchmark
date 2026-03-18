@@ -6,6 +6,7 @@ from . import api_views
 router = DefaultRouter()
 router.register(r"products", api_views.ProductViewSet, basename="product")
 router.register(r"categories", api_views.CategoryViewSet, basename="category")
+router.register(r"discounts", api_views.DiscountViewSet, basename="discount")
 
 urlpatterns = [
     path("", include(router.urls)),
