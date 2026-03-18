@@ -1,0 +1,12 @@
+__pycache__
+.env
+**.dump
+
+django_template/static_built
+static_collected
+
+node_modules
+
+celerybeat-schedule*
+
+*.idea

@@ -1,0 +1,14 @@
+build:
+  docker:
+    web:
+      dockerfile: Dockerfile
+      target: production
+release:
+  command:
+    - python3 manage.py migrate
+  image: web
+run:
+  web:
+    command:
+      - ./entrypoint.sh docker-start heroku-gunicorn-celery-celery-beat
+    image: web

@@ -1,0 +1,159 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: tests-${{ github.head_ref || github.ref }}
+      cancel-in-progress: true
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres  # pragma: allowlist secret
+      REDIS_URL: redis://localhost:6379/0  # pragma: allowlist secret
+      SECRET_KEY: test  # pragma: allowlist secret
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres # pragma: allowlist secret
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - "5432:5432"
+      redis:
+        image: redis:7.2
+        ports:
+          - "6379:6379"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+        env:
+          POETRY_VERSION: "2.3.2"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: poetry
+
+      - name: Install dependencies with Poetry
+        run: poetry install
+
+      - name: Install dependencies with apt
+        uses: awalsh128/cache-apt-pkgs-action@v1.5.3
+        with:
+          packages: gettext
+          version: 1.0
+
+      - name: Run pre-commit hooks
+        uses: pre-commit/action@v3.0.1
+
+      - name: Check for missing migrations
+        run: poetry run python3 manage.py makemigrations --check --noinput
+        if: always()
+
+      - name: Check for uncompiled translations
+        run: |
+          # Update the timestamp of all .po files so their timestamps are newer
+          # the .mo files, ensuring compilemessages will always attempt to
+          # recompile the .po files.
+          find . | grep django.po | xargs touch
+          poetry run python3 manage.py compilemessages
+          git diff --exit-code
+        if: always()
+
+      - name: Collect staticfiles
+        run: poetry run python3 manage.py collectstatic --noinput
+
+      - name: Run tests
+        run: poetry run python3 manage.py test --settings=django_template.settings.test -v=2
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.ref == 'refs/heads/main'
+    concurrency:
+      group: deploy-${{ github.head_ref || github.ref }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Check if required secrets are set
+        run: |
+          if [ -z "${{ secrets.DOKKU_DEPLOY_KEY_BASE64 }}" ]; then
+            echo "DOKKU_DEPLOY_KEY_BASE64 is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.DOKKU_HOST_NAME }}" ]; then
+            echo "DOKKU_HOST_NAME is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.DOKKU_HOST_PORT }}" ]; then
+            echo "DOKKU_HOST_PORT is not set"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build Docker image
+        run: docker build --target production -t dokku/django-template:${{ github.sha }} --build-arg GIT_REVISION=${{ github.sha }} .
+
+      - name: Set up SSH key
+        run: |
+          echo "${{ secrets.DOKKU_DEPLOY_KEY_BASE64 }}" | base64 -d > /tmp/dokku-deploy-key
+          chmod 600 /tmp/dokku-deploy-key
+
+      - name: Prune cache
+        run: |
+          ssh \
+            -p ${{ secrets.DOKKU_HOST_PORT }} \
+            -i /tmp/dokku-deploy-key \
+            -o UserKnownHostsFile=/dev/null \
+            -o StrictHostKeyChecking=no \
+            ubuntu@${{ secrets.DOKKU_HOST_NAME }} \
+            sudo \
+            docker \
+            system \
+            prune \
+            -f
+
+      - name: Delete unused Docker images
+        run: |
+          ssh \
+            -p ${{ secrets.DOKKU_HOST_PORT }} \
+            -i /tmp/dokku-deploy-key \
+            -o UserKnownHostsFile=/dev/null \
+            -o StrictHostKeyChecking=no \
+            ubuntu@${{ secrets.DOKKU_HOST_NAME }} \
+            'sudo docker images dokku/django-template -q | xargs sudo docker image rm --force' \
+            || true
+
+      - name: Deploy to Dokku
+        run: |
+          docker \
+            save \
+            dokku/django-template:${{ github.sha }} \
+            | ssh \
+              -p ${{ secrets.DOKKU_HOST_PORT }} \
+              -i /tmp/dokku-deploy-key \
+              -o UserKnownHostsFile=/dev/null \
+              -o StrictHostKeyChecking=no \
+              dokku@${{ secrets.DOKKU_HOST_NAME }} \
+              git:load-image \
+              django-template \
+              dokku/django-template:${{ github.sha }}

@@ -1,0 +1,73 @@
+services:
+  web: &web
+    build: .
+    command: docker-start runserver-plus
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - ./:/app/
+      - node-modules-data:/app/node_modules/
+    init: true
+    stdin_open: true
+    tty: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  celery:
+    <<: *web
+    command: docker-start watchmedo-celery
+    ports: []
+    stdin_open: false
+    tty: false
+
+  celery-beat:
+    <<: *web
+    command: docker-start watchmedo-celery-beat
+    ports: []
+    stdin_open: false
+    tty: false
+
+  tailwind-watch:
+    <<: *web
+    command: docker-start tailwind-watch
+    ports: []
+    stdin_open: false
+
+  postgres:
+    # Make sure Postgres version is in sync with CI configs and is available on Heroku
+    # https://devcenter.heroku.com/articles/heroku-postgres-version-support
+    image: postgres:17
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres_db
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: postgres_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres_user", "-d", "postgres_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    # Make sure Redis version is in sync with CI configs and is available on Heroku
+    # https://devcenter.heroku.com/articles/heroku-redis#version-support-and-legacy-infrastructure
+    image: redis:7.2
+    volumes:
+      - redis-data:/data/
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "1080:1080"
+
+volumes:
+  node-modules-data:
+  postgres-data:
+  redis-data:

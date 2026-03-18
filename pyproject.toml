@@ -1,0 +1,72 @@
+[tool.poetry]
+name = "django-template"
+version = "0.0.0"
+description = ""
+authors = ["Vilantis <hello@vilantis.ai>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.13"
+Django = "^5.2.11"
+django-extensions = "^4.1"
+gunicorn = "^23.0.0"
+psycopg = "^3.3.2"
+django-storages = { extras = ["s3"], version = "^1.14.6" }
+djangorestframework = "^3.16.1"
+djangorestframework-simplejwt = "^5.5.1"
+drf-spectacular = "^0.28.0"
+drf-standardized-errors = { extras = ["openapi"], version = "^0.15.0" }
+celery = { extras = ["redis"], version = "^5.6.2" }
+dj-database-url = "^3.1.0"
+whitenoise = "^6.11.0"
+ipython = "^9.10.0"
+django-silk = "^5.4.3"
+sentry-sdk = "^2.52.0"
+django-hijack = "^3.7.6"
+factory-boy = "^3.3.3"
+requests = "^2.32.5"
+
+[tool.poetry.group.dev.dependencies]
+werkzeug = "^3.1.5"
+watchdog = "^6.0.0"
+django-browser-reload = "^1.21.0"
+ruff = "*"
+pre-commit = "^4.5.1"
+bandit = "^1.9.3"
+detect-secrets = "^1.5.0"
+djlint = "^1.36.4"
+dslr = "*"
+django-types = "*"
+djangorestframework-types = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+  "E",   # https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
+  "F",   # https://docs.astral.sh/ruff/rules/#pyflakes-f
+  "W",   # https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
+  "I",   # https://docs.astral.sh/ruff/rules/#isort-i
+  "SIM", # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+  "DJ",  # https://docs.astral.sh/ruff/rules/#flake8-django-dj
+  "T10", # https://docs.astral.sh/ruff/rules/#flake8-debugger-t10
+]
+ignore = [
+  "SIM108", # don't recommend ternary operator
+]
+exclude = ["django_template/*/migrations/*.py"]
+
+[tool.ruff.format]
+exclude = ["django_template/*/migrations/*.py"]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+
+[tool.djlint]
+# https://www.djlint.com/docs/linter/#rules
+ignore = "H029,H030,H031"

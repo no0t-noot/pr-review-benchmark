@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+    <div class="space-y-2">
+        <h1 class="text-gray-800 font-bold text-3xl">{% translate "Register" %}</h1>
+        <form method="POST">
+            {% csrf_token %}
+            {% with submit_button_text="Register" %}
+                {% include "components/tailwind_form.html" %}
+            {% endwith %}
+        </form>
+    </div>
+{% endblock content %}

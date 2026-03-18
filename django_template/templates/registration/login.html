@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+    <div class="space-y-2">
+        <h1 class="text-gray-800 font-bold text-3xl">{% translate "Log in" %}</h1>
+        <form method="POST">
+            {% csrf_token %}
+            {% with submit_button_text="Log in" %}
+                {% include "components/tailwind_form.html" %}
+            {% endwith %}
+        </form>
+        <p class="prose">
+            <a href="{% url "password_reset" %}">{% translate "Forgot password?" %}</a>
+        </p>
+    </div>
+{% endblock content %}

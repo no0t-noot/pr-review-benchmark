@@ -1,0 +1,22 @@
+{% load i18n %}
+{% if form.non_field_errors %}
+    <div class="text-red-500 text-xs">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+    </div>
+{% endif %}
+{% for field in form %}
+    <div class="my-4">
+        <label for="{{ field.id_for_label }}"
+               class="block text-gray-700 text-sm font-bold mb-2">
+            {{ field.label }}
+            {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+        </label>
+        {{ field }}
+        {% if field.help_text %}<div class="text-gray-500 text-xs">{{ field.help_text }}</div>{% endif %}
+        {% for error in field.errors %}<div class="text-red-500 text-xs">{{ error }}</div>{% endfor %}
+    </div>
+{% endfor %}
+<div class="flex items-center justify-between">
+    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            type="submit">{% translate submit_button_text %}</button>
+</div>
