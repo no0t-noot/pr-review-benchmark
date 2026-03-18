@@ -16,12 +16,14 @@ class SupplierSerializer(serializers.ModelSerializer):
 
 
 class ProductListSerializer(serializers.ModelSerializer):
-    category = serializers.StringRelatedField()
-    supplier = serializers.StringRelatedField()
+    category = CategorySerializer(read_only=True)
 
     class Meta:
         model = Product
-        fields = ["id", "name", "sku", "price", "category", "supplier", "is_active", "created_at"]
+        fields = ["id", "name", "sku", "unit_price", "category", "is_active", "warehouse_code", "created_at"]
+
+    unit_price = serializers.DecimalField(source="price", max_digits=10, decimal_places=2)
+    warehouse_code = serializers.CharField()
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
@@ -58,9 +60,12 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
 
 class ProductCreateUpdateSerializer(serializers.ModelSerializer):
+    unit_price = serializers.DecimalField(source="price", max_digits=10, decimal_places=2)
+    warehouse_code = serializers.CharField(required=True)
+
     class Meta:
         model = Product
-        fields = ["id", "name", "sku", "description", "price", "category", "supplier", "is_active"]
+        fields = ["id", "name", "sku", "description", "unit_price", "category", "warehouse_code", "is_active"]
 
     def validate_price(self, value):
         if value < 0:
