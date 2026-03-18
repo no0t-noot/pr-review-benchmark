@@ -55,7 +55,7 @@ jobs:
         run: poetry install
 
       - name: Install dependencies with apt
-        uses: awalsh128/cache-apt-pkgs-action@v1.5.3
+        uses: awalsh128/cache-apt-pkgs-action@v1.6.0
         with:
           packages: gettext
           version: 1.0
