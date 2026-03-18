@@ -25,6 +25,7 @@ sentry-sdk = "^2.52.0"
 django-hijack = "^3.7.6"
 factory-boy = "^3.3.3"
 requests = "^2.32.5"
+python-dateutil = "^2.9.0"
 
 [tool.poetry.group.dev.dependencies]
 werkzeug = "^3.1.5"
