@@ -1,7 +1,9 @@
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import F
+from django.http import JsonResponse
 from django.utils import timezone
 from rest_framework import generics, status, viewsets
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -97,3 +99,38 @@ class RestockAPIView(generics.GenericAPIView):
 
         inventory = Inventory.objects.get(product=product)
         return Response(InventorySerializer(inventory).data, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def bulk_create_products(request):
+    products_data = request.data.get("products", [])
+    if not products_data:
+        return JsonResponse({"error": "No products provided"}, status=400)
+
+    if not isinstance(products_data, list):
+        return JsonResponse({"error": "Products must be a list"}, status=400)
+
+    created_ids = []
+    with connection.cursor() as cursor:
+        for item in products_data:
+            name = item.get("name", "")
+            sku = item.get("sku", "")
+            price = item.get("price", 0)
+            category_id = item.get("category_id")
+            supplier_id = item.get("supplier_id")
+
+            if not name or not sku:
+                continue
+
+            cursor.execute(
+                "INSERT INTO products_product (name, sku, description, price, category_id, supplier_id,"
+                " is_active, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW())"
+                " RETURNING id",
+                [name, sku, "", price, category_id, supplier_id, True],
+            )
+            row = cursor.fetchone()
+            if row:
+                created_ids.append(row[0])
+
+    return JsonResponse({"created": len(created_ids), "ids": created_ids})
