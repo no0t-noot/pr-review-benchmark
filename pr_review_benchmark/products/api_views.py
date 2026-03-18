@@ -5,6 +5,7 @@ from rest_framework import generics, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from .export import generate_product_csv, send_export_email
 from .models import Category, Inventory, PriceHistory, Product
 from .serializers import (
     CategorySerializer,
@@ -97,3 +98,13 @@ class RestockAPIView(generics.GenericAPIView):
 
         inventory = Inventory.objects.get(product=product)
         return Response(InventorySerializer(inventory).data, status=status.HTTP_200_OK)
+
+
+class ProductExportAPIView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        recipient = request.data.get("email")
+        csv_content = generate_product_csv()
+        send_export_email(recipient, csv_content)
+        return Response({"status": "export_sent"}, status=status.HTTP_200_OK)
