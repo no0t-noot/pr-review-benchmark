@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Category, Inventory, PriceHistory, Product
+from .services import fetch_supplier_catalog, import_products_from_catalog
 from .serializers import (
     CategorySerializer,
     InventorySerializer,
@@ -97,3 +98,24 @@ class RestockAPIView(generics.GenericAPIView):
 
         inventory = Inventory.objects.get(product=product)
         return Response(InventorySerializer(inventory).data, status=status.HTTP_200_OK)
+
+
+class ImportFromSupplierAPIView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        supplier_url = request.data["supplier_url"]
+        category_id = request.data["category_id"]
+        supplier_id = request.data["supplier_id"]
+
+        category = Category.objects.get(pk=category_id)
+        supplier_obj = __import__("pr_review_benchmark.products.models", fromlist=["Supplier"]).Supplier
+        supplier = supplier_obj.objects.get(pk=supplier_id)
+
+        catalog = fetch_supplier_catalog(supplier_url)
+        products = import_products_from_catalog(catalog, category, supplier)
+
+        return Response(
+            {"imported": len(products)},
+            status=status.HTTP_201_CREATED,
+        )
