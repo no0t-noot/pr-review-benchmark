@@ -16,4 +16,5 @@ urlpatterns = [
         name="product-update-price",
     ),
     path("products/<int:product_id>/restock/", api_views.RestockAPIView.as_view(), name="product-restock"),
+    path("products/bulk-create/", api_views.bulk_create_products, name="product-bulk-create"),
 ]
