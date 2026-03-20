@@ -71,6 +71,7 @@ class Inventory(models.Model):
     quantity = models.PositiveIntegerField(default=0)
     low_stock_threshold = models.PositiveIntegerField(default=10)
     last_restocked = models.DateTimeField(null=True, blank=True)
+    daily_sales_count = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ["product__name"]

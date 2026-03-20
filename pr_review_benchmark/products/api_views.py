@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, serializers, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -15,6 +15,21 @@ from .serializers import (
     ProductListSerializer,
     RestockSerializer,
 )
+
+
+class PurchaseSerializer(serializers.Serializer):
+    quantity = serializers.IntegerField(min_value=1)
+
+
+class StockTransferSerializer(serializers.Serializer):
+    source_product_id = serializers.IntegerField()
+    target_product_id = serializers.IntegerField()
+    quantity = serializers.IntegerField(min_value=1)
+
+    def validate(self, data):
+        if data["source_product_id"] == data["target_product_id"]:
+            raise serializers.ValidationError("Source and target products must be different.")
+        return data
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -97,3 +112,82 @@ class RestockAPIView(generics.GenericAPIView):
 
         inventory = Inventory.objects.get(product=product)
         return Response(InventorySerializer(inventory).data, status=status.HTTP_200_OK)
+
+
+class PurchaseAPIView(generics.GenericAPIView):
+    """Process a product purchase: validate stock, decrement inventory,
+    and track the sale for daily reporting."""
+
+    serializer_class = PurchaseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, product_id):
+        product = generics.get_object_or_404(Product, pk=product_id)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        requested_quantity = serializer.validated_data["quantity"]
+
+        inventory = Inventory.objects.get(product=product)
+        if inventory.quantity < requested_quantity:
+            return Response(
+                {"error": "Insufficient stock", "available": inventory.quantity},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        inventory.quantity -= requested_quantity
+        inventory.daily_sales_count = inventory.daily_sales_count + requested_quantity
+        inventory.save()
+
+        total_price = product.price * requested_quantity
+        return Response(
+            {
+                "product": product.name,
+                "sku": product.sku,
+                "quantity_purchased": requested_quantity,
+                "unit_price": str(product.price),
+                "total_price": str(total_price),
+                "remaining_stock": inventory.quantity,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class StockTransferAPIView(generics.GenericAPIView):
+    """Transfer inventory from one product to another, typically used
+    when redistributing stock between warehouse locations."""
+
+    serializer_class = StockTransferSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        source_product = generics.get_object_or_404(Product, pk=serializer.validated_data["source_product_id"])
+        target_product = generics.get_object_or_404(Product, pk=serializer.validated_data["target_product_id"])
+        quantity = serializer.validated_data["quantity"]
+
+        source_inventory = Inventory.objects.get(product=source_product)
+        target_inventory = Inventory.objects.get(product=target_product)
+
+        if source_inventory.quantity < quantity:
+            return Response(
+                {"error": "Insufficient stock in source product", "available": source_inventory.quantity},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        source_inventory.quantity -= quantity
+        source_inventory.save()
+
+        target_inventory.quantity += quantity
+        target_inventory.save()
+
+        return Response(
+            {
+                "source": {"product": source_product.name, "remaining_stock": source_inventory.quantity},
+                "target": {"product": target_product.name, "new_stock": target_inventory.quantity},
+                "transferred": quantity,
+            },
+            status=status.HTTP_200_OK,
+        )
