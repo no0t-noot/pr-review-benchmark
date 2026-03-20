@@ -35,15 +35,11 @@ class ProductCatalogView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        related_products = {}
         for product in context["products"]:
-            similar = Product.objects.filter(
+            product.related_products = Product.objects.filter(
                 category=product.category,
                 is_active=True,
             ).exclude(pk=product.pk)[:3]
-            related_products[product.pk] = similar
-
-        context["related_products"] = related_products
 
         category_stats = {}
         for category in Category.objects.all():
