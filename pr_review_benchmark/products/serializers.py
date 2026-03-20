@@ -101,3 +101,17 @@ class PriceHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = PriceHistory
         fields = ["id", "old_price", "new_price", "changed_at", "changed_by_email"]
+
+
+class DiscountApplySerializer(serializers.Serializer):
+    discount_percent = serializers.IntegerField(min_value=1, max_value=100)
+
+
+class StockAlertSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+    product_sku = serializers.CharField(source="product.sku", read_only=True)
+    alert_triggered = serializers.BooleanField(source="is_low_stock", read_only=True)
+
+    class Meta:
+        model = Inventory
+        fields = ["id", "product_name", "product_sku", "quantity", "low_stock_threshold", "alert_triggered"]

@@ -16,4 +16,13 @@ urlpatterns = [
         name="product-update-price",
     ),
     path("products/<int:product_id>/restock/", api_views.RestockAPIView.as_view(), name="product-restock"),
+    path(
+        "products/<int:product_id>/apply-discount/",
+        api_views.ApplyDiscountAPIView.as_view(),
+        name="product-apply-discount",
+    ),
+    path("products/cheapest/", api_views.CheapestProductsAPIView.as_view(), name="cheapest-products"),
+    path("products/low-stock-alerts/", api_views.LowStockAlertsAPIView.as_view(), name="low-stock-alerts"),
+    path("products/inactive/", api_views.InactiveProductsAPIView.as_view(), name="inactive-products"),
+    path("categories/revenue/", api_views.CategoryRevenueAPIView.as_view(), name="category-revenue"),
 ]
